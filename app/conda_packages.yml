@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   # core
-  - python==3.7
+  - python==3.7.*
   - pip
   - conda
   # fastapi
@@ -18,7 +18,5 @@ dependencies:
   # for handling GeoSpatial data
   - pandas>=1.1
   - geopandas>=0.8
-  - gdal=>3.0.4
-  - fiona>=1.8.13
-  - pyproj>=2.6.1
+  - gdal==3.0.*
   - shapely
