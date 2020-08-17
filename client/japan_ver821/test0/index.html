@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>esri japan_ver821(valid geometry) test0</title>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.min.js"></script>
+  <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+</head>
+
+<body>
+  <div id="map" style="position:absolute;top:0;left:0;bottom:0;right:0;"></div>
+  <script>
+    const map = L.map("map", {
+      maxZoom: 19,
+      zoom: 15,
+      center: [35.6941, 139.792615],
+      preferCanvas: true
+    });
+
+    L.tileLayer('https://maps.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+      attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル</a>"
+    }).addTo(map);
+
+    L.hash(map);
+
+    L.vectorGrid.slicer("https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson", {
+      attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+      maxNativeZoom: 18,
+      minNativeZoom: 12,
+      maxZoom: 18,
+      // rendererFactory: L.canvas.tile,
+      // vectorTileLayerStyles: {
+      //   "厚真町堆積土トレース": {
+      //     color: "red",
+      //     weight: 2
+      //   }
+      // }
+    }).addTo(map);
+
+    /*
+    Object.assign(new L.GridLayer({
+      attribution: "<a href='https://github.com/gsi-cyberjapan/gsimaps-vector-experiment' target='_blank'>国土地理院ベクトルタイル提供実験</a>",
+      minZoom: 4,
+      maxZoom: 16
+    }), {
+      createTile: function(coords) {
+        const template = "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf";
+        const div = document.createElement('div');
+        div.group = L.layerGroup();
+        fetch(L.Util.template(template, coords)).then(a => a.arrayBuffer()).then(buffer => {
+          const road = new VectorTile(new Pbf(buffer)).layers.road;
+          if (!road) return;
+          if (!div.group) return;
+          if (!this._map) return;
+          for (let i = 0; i < road.length; i++) {
+            const geojson = road.feature(i).toGeoJSON(coords.x, coords.y, coords.z);
+            const lines = geojson.geometry.type === "LineString" ? [geojson.geometry.coordinates] : geojson.geometry.coordinates;
+            lines.forEach(line => {
+              const head = line[0];
+              const tail = line[line.length - 1];
+              let bearing = turf.bearing(head, tail);
+              if (bearing < 0) bearing += 180;
+              if (bearing > 90) bearing -= 90;
+              div.group.addLayer(L.polyline(line.map(a => [a[1], a[0]]), {
+                color: `hsl(${45 - bearing*4},90%,45%)`
+              }));
+            });
+          }
+          div.group.addTo(this._map);
+        });
+        return div;
+      }
+    }).on("tileunload", function(e) {
+      if (e.tile.group) {
+        if (this._map) this._map.removeLayer(e.tile.group);
+        delete e.tile.group;
+      }
+    }).addTo(map);
+    */
+  </script>
+</body>
+
+</html>
