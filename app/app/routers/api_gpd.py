@@ -19,6 +19,15 @@ router = APIRouter()
 # const
 EXT_DATA_PATH = "/app/data"
 
+# TMP: Test-Data
+
+# japan_ver821 (only valid)
+tmp = gpd.read_file(
+    EXT_DATA_PATH + "/japan_ver821/japan_ver821.shp"
+)
+gdf_japan_ver821 = tmp[tmp.is_valid].copy()
+del tmp
+
 
 @router.get("/")
 async def site_root():
@@ -29,10 +38,11 @@ async def site_root():
 @router.get("/tmp.geojson")
 async def tmp_intersect_geojson():
     # read test-data
-    tmp = gpd.read_file(
-        EXT_DATA_PATH + "/japan_ver821/japan_ver821.shp"
-    )
-    gdf = tmp[tmp.is_valid]     # intersectionなどのクエリが動かなくなる
+    # tmp = gpd.read_file(
+    #     EXT_DATA_PATH + "/japan_ver821/japan_ver821.shp"
+    # )
+    # gdf = tmp[tmp.is_valid]     # intersectionなどのクエリが動かなくなる
+    gdf = gdf_japan_ver821.copy()
 
     # intersections
     area = shapely.geometry.Polygon( # TMP
