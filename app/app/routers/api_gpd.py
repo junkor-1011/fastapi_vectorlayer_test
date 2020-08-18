@@ -157,6 +157,50 @@ async def osmnx_highway_nodes(
     )
 
 
+@router.get("/osmnx/highway/edges/{z}/{x}/{y}.geojson")
+async def osmnx_highway_edges(
+    z: int,
+    x: int,
+    y: int,
+    highway: Optional[str] = None,
+) -> dict:
+    """
+    ***
+    """
+    gdf = gdf_edges_highway.copy()
+
+    # get bbox
+    nw = tile_coord(z, x, y)
+    se = tile_coord(z, x+1, y+1)
+    bbox = shapely.geometry.Polygon(
+        [
+            nw, (se[0], nw[1]),
+            se, (nw[0], se[1]), nw
+        ]
+    )
+
+    # filter by highway
+    if highway is not None:
+        # T.B.D
+        gdf = gdf
+
+    # filtering
+    intersections = gdf.geometry.intersection(bbox)
+    gs_filtered = intersections[~intersections.is_empty] # geoseries
+    gdf_filtered = gpd.GeoDataFrame(
+        gdf.loc[gs_filtered.index, :].drop(columns=['geometry']),
+        geometry=gs_filtered,
+    )
+
+    # NO DATA
+    if len(gs_filtered) == 0:
+        raise HTTPException(status_code=404, detail="No Data")
+
+    # return geojson
+    return json.loads(
+        gdf_filtered.to_json()
+    )
+
 
 def tile_coord(
     zoom: int,
