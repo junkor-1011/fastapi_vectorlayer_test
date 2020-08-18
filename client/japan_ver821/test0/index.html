@@ -6,8 +6,6 @@
 <title>FastAPI GeoJSONベクターサーバーテスト</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.3/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
-<!-- <script src="./TileLayer.GeoJSON.js"></script> -->
-<!-- <script src="./leaflet-hash.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-tilelayer-geojson/1.0.2/TileLayer.GeoJSON.min.js "></script>
 <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
 <style>
@@ -26,60 +24,16 @@ html, body, #mapdiv {height: 100%; width: 100%;}
 <div id="mapdiv">
 <script>
 
-
-//鉄道中心線
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_railcl/style.js', false);
-xhr.send(null);
-var stylejs = eval( "(" + xhr.responseText + ")" );
-
-var raillayer = new L.TileLayer.GeoJSON(
-'https://cyberjapandata.gsi.go.jp/xyz/experimental_railcl/{z}/{x}/{y}.geojson',
-stylejs.options,stylejs.geojsonOptions);
-
-
-//道路中心線
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_rdcl/style.js', false);
-xhr.send(null);
-var stylejs = eval( "(" + xhr.responseText + ")" );
-
-var rdcllayer = new L.TileLayer.GeoJSON(
-'https://cyberjapandata.gsi.go.jp/xyz/experimental_rdcl/{z}/{x}/{y}.geojson',
-stylejs.options,stylejs.geojsonOptions);
-
-
-//河川中心線
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_rvrcl/style.js', false);
-xhr.send(null);
-var stylejs = eval( "(" + xhr.responseText + ")" );
-
-var rvrcllayer = new L.TileLayer.GeoJSON(
-'https://cyberjapandata.gsi.go.jp/xyz/experimental_rvrcl/{z}/{x}/{y}.geojson',
-stylejs.options,stylejs.geojsonOptions);
-
-
-//注記
-var xhr = new XMLHttpRequest();
-xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_anno/style.js', false);
-xhr.send(null);
-var stylejs = eval( "(" + xhr.responseText + ")" );
-
-var annolayer = new L.TileLayer.GeoJSON(
-'https://cyberjapandata.gsi.go.jp/xyz/experimental_anno/{z}/{x}/{y}.geojson',
-stylejs.options,stylejs.geojsonOptions);
-
 // TMP Test
-let japan_ver821 = new L.TileLayer.GeoJSON(
+const japan_ver821 = new L.TileLayer.GeoJSON(
   'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson',
-  {crossOrigin: true,
+  {crossOrigin: false,
    attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
   });
 
-let yamagata = new L.TileLayer.GeoJSON(
+const yamagata = new L.TileLayer.GeoJSON(
   'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson?KEN=山形県',
-  {crossOrigin: true,
+  {crossOrigin: false,
    attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
   });
 
@@ -90,38 +44,32 @@ const osm = L.tileLayer('http://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
   });
 
 
-var std = L.tileLayer(
+const std = L.tileLayer(
 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
 {attribution: "地理院タイル（標準地図）",
 maxNativeZoom: 18, maxZoom: 18, opacity:1});
-var ort = L.tileLayer(
+
+const ort = L.tileLayer(
 'https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg',
 {attribution: "地理院タイル（オルソ）",
 maxNativeZoom: 17, maxZoom: 18, opacity:0.7});
 
-var blank = L.tileLayer(
+const blank = L.tileLayer(
 'https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png',
 {attribution: "地理院タイル（白地図）",
 maxNativeZoom: 14, maxZoom: 18, opacity:1});
 
-var GSI = {
-	GLOBALS : {}
-};
-
-GSI.GLOBALS.map = L.map('mapdiv', {
+const map = L.map('mapdiv', {
   center: [35.705698,139.957527], zoom: 16,minZoom: 2, maxZoom: 18,
-  // layers: [rvrcllayer,rdcllayer,raillayer,annolayer]
   });
 
-L.control.scale({imperial: false}).addTo(GSI.GLOBALS.map);
+L.control.scale({imperial: false}).addTo(map);
 
-// var baseLayers = {"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank};
-var baseLayers ={};
-// var overlays = {"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank,'地図情報（河川中心線）': rvrcllayer,'地図情報（道路中心線）': rdcllayer,'地図情報（鉄道中心線）': raillayer,'地図情報（注記）': annolayer, 'hoge':hoge, 'osm': osm};
-var overlays = {"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank, 'osm': osm, 'japan_ver821':japan_ver821, 'yamagata': yamagata};
+const baseLayers ={"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank, 'osm': osm.addTo(map)};
+const overlays = {'japan_ver821':japan_ver821, 'yamagata': yamagata};
 
-L.control.layers(baseLayers, overlays,{position:'topright',collapsed:false}).addTo(GSI.GLOBALS.map);
-var hash = L.hash(GSI.GLOBALS.map);
+L.control.layers(baseLayers, overlays,{position:'topright',collapsed:false}).addTo(map);
+const hash = L.hash(map);
 </script>
 </body>
 </html>
