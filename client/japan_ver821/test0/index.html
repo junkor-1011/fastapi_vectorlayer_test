@@ -1,41 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
 <head>
-  <meta charset="UTF-8">
-  <title>esri japan_ver821(valid geometry) test0</title>
-  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
-  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
-  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.min.js"></script>
-  <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>FastAPI GeoJSONベクターサーバーテスト</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.3/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
+<!-- <script src="./TileLayer.GeoJSON.js"></script> -->
+<!-- <script src="./leaflet-hash.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-tilelayer-geojson/1.0.2/TileLayer.GeoJSON.min.js "></script>
+<script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+<style>
+
+body {padding: 0; margin: 0;}
+html, body, #mapdiv {height: 100%; width: 100%;}
+.leaflet-container {background: #fff;}
+.gsi-div-icon {
+	background: none;
+	white-space: nowrap;
+	border:none;
+}
+</style>
 </head>
-
 <body>
-  <div id="map" style="position:absolute;top:0;left:0;bottom:0;right:0;"></div>
-  <script>
-    const map = L.map("map", {
-      maxZoom: 19,
-      zoom: 15,
-      center: [35.6941, 139.792615],
-      preferCanvas: true
-    });
+<div id="mapdiv">
+<script>
 
-    L.tileLayer('https://maps.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-      attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル</a>"
-    }).addTo(map);
 
-    L.hash(map);
+//鉄道中心線
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_railcl/style.js', false);
+xhr.send(null);
+var stylejs = eval( "(" + xhr.responseText + ")" );
 
-    L.vectorGrid.slicer("https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson", {
-      attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
-      maxNativeZoom: 12,
-      minNativeZoom: 10,
-      maxZoom: 18,
-    }).addTo(map);
+var raillayer = new L.TileLayer.GeoJSON(
+'https://cyberjapandata.gsi.go.jp/xyz/experimental_railcl/{z}/{x}/{y}.geojson',
+stylejs.options,stylejs.geojsonOptions);
 
-  </script>
+
+//道路中心線
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_rdcl/style.js', false);
+xhr.send(null);
+var stylejs = eval( "(" + xhr.responseText + ")" );
+
+var rdcllayer = new L.TileLayer.GeoJSON(
+'https://cyberjapandata.gsi.go.jp/xyz/experimental_rdcl/{z}/{x}/{y}.geojson',
+stylejs.options,stylejs.geojsonOptions);
+
+
+//河川中心線
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_rvrcl/style.js', false);
+xhr.send(null);
+var stylejs = eval( "(" + xhr.responseText + ")" );
+
+var rvrcllayer = new L.TileLayer.GeoJSON(
+'https://cyberjapandata.gsi.go.jp/xyz/experimental_rvrcl/{z}/{x}/{y}.geojson',
+stylejs.options,stylejs.geojsonOptions);
+
+
+//注記
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://cyberjapandata.gsi.go.jp/xyz/experimental_anno/style.js', false);
+xhr.send(null);
+var stylejs = eval( "(" + xhr.responseText + ")" );
+
+var annolayer = new L.TileLayer.GeoJSON(
+'https://cyberjapandata.gsi.go.jp/xyz/experimental_anno/{z}/{x}/{y}.geojson',
+stylejs.options,stylejs.geojsonOptions);
+
+// TMP Test
+let japan_ver821 = new L.TileLayer.GeoJSON(
+  'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson',
+  {crossOrigin: true,
+   attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+  });
+
+let yamagata = new L.TileLayer.GeoJSON(
+  'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson?KEN=山形県',
+  {crossOrigin: true,
+   attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+  });
+
+const osm = L.tileLayer('http://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
+    attribution: "<a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
+    minZoom: 10,
+    maxNativeZoom: 18
+  });
+
+
+var std = L.tileLayer(
+'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+{attribution: "地理院タイル（標準地図）",
+maxNativeZoom: 18, maxZoom: 18, opacity:1});
+var ort = L.tileLayer(
+'https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg',
+{attribution: "地理院タイル（オルソ）",
+maxNativeZoom: 17, maxZoom: 18, opacity:0.7});
+
+var blank = L.tileLayer(
+'https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png',
+{attribution: "地理院タイル（白地図）",
+maxNativeZoom: 14, maxZoom: 18, opacity:1});
+
+var GSI = {
+	GLOBALS : {}
+};
+
+GSI.GLOBALS.map = L.map('mapdiv', {
+  center: [35.705698,139.957527], zoom: 16,minZoom: 2, maxZoom: 18,
+  // layers: [rvrcllayer,rdcllayer,raillayer,annolayer]
+  });
+
+L.control.scale({imperial: false}).addTo(GSI.GLOBALS.map);
+
+// var baseLayers = {"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank};
+var baseLayers ={};
+// var overlays = {"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank,'地図情報（河川中心線）': rvrcllayer,'地図情報（道路中心線）': rdcllayer,'地図情報（鉄道中心線）': raillayer,'地図情報（注記）': annolayer, 'hoge':hoge, 'osm': osm};
+var overlays = {"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank, 'osm': osm, 'japan_ver821':japan_ver821, 'yamagata': yamagata};
+
+L.control.layers(baseLayers, overlays,{position:'topright',collapsed:false}).addTo(GSI.GLOBALS.map);
+var hash = L.hash(GSI.GLOBALS.map);
+</script>
 </body>
-
 </html>

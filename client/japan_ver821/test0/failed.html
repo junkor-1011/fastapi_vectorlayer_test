@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>esri japan_ver821(valid geometry) test0</title>
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.min.js"></script>
+  <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+</head>
+
+<body>
+  <div id="map" style="position:absolute;top:0;left:0;bottom:0;right:0;"></div>
+  <script>
+    const map = L.map("map", {
+      maxZoom: 19,
+      zoom: 15,
+      center: [35.6941, 139.792615],
+      preferCanvas: true
+    });
+
+    L.tileLayer('https://maps.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+      attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル</a>"
+    }).addTo(map);
+
+    L.hash(map);
+
+    L.vectorGrid.slicer("https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson", {
+      attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+      maxNativeZoom: 12,
+      minNativeZoom: 10,
+      maxZoom: 18,
+    }).addTo(map);
+
+  </script>
+</body>
+
+</html>
