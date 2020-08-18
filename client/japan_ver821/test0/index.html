@@ -19,17 +19,31 @@ html, body, #mapdiv {height: 100%; width: 100%;}
         <div id="mapdiv">
             <script>
 
-                // TMP Test
+                // Polygons test
                 const japan_ver821 = new L.TileLayer.GeoJSON(
                     'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson',
                     {crossOrigin: false,
                         attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
                     });
 
+                // url + query-string test
                 const yamagata = new L.TileLayer.GeoJSON(
                     'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson?KEN=山形県',
                     {crossOrigin: false,
                         attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+                    });
+
+                // Points test
+                const nodes_highway = new L.TileLayer.GeoJSON(
+                    'https://localhost:8443/api_gpd/osmnx/highway/nodes/{z}/{x}/{y}.geojson',
+                    {crossOrigin: false,
+                        attribution: "<a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
+                    });
+                // LineString test
+                const edges_highway = new L.TileLayer.GeoJSON(
+                    'https://localhost:8443/api_gpd/osmnx/highway/edges/{z}/{x}/{y}.geojson',
+                    {crossOrigin: false,
+                        attribution: "<a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
                     });
 
                 const osm = L.tileLayer('http://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
@@ -61,7 +75,7 @@ html, body, #mapdiv {height: 100%; width: 100%;}
                 L.control.scale({imperial: false}).addTo(map);
 
                 const baseLayers ={"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank, 'osm': osm.addTo(map)};
-                const overlays = {'japan_ver821':japan_ver821, 'yamagata': yamagata};
+                const overlays = {'japan_ver821':japan_ver821, 'yamagata': yamagata, 'nodes': nodes_highway, 'edges': edges_highway};
 
                 L.control.layers(baseLayers, overlays,{position:'topright',collapsed:false}).addTo(map);
                 const hash = L.hash(map);
