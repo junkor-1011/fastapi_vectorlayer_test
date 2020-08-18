@@ -33,6 +33,14 @@ tmp = gpd.read_file(
 gdf_japan_ver821 = tmp[tmp.is_valid].copy()
 del tmp
 
+# osmnx highway nodes & edges sample
+gdf_nodes_highway = gpd.read_file(
+    EXT_DATA_PATH + "/nodes_highway/nodes.shp"
+)
+gdf_edges_highway = gpd.read_file(
+    EXT_DATA_PATH + "/edges_highway/edges.shp"
+)
+
 
 @router.get("/")
 async def site_root():
@@ -42,11 +50,6 @@ async def site_root():
 
 @router.get("/tmp.geojson")
 async def tmp_intersect_geojson():
-    # read test-data
-    # tmp = gpd.read_file(
-    #     EXT_DATA_PATH + "/japan_ver821/japan_ver821.shp"
-    # )
-    # gdf = tmp[tmp.is_valid]     # intersectionなどのクエリが動かなくなる
     gdf = gdf_japan_ver821.copy()
 
     # intersections
@@ -107,6 +110,52 @@ async def esri_japan_ver821_test0(
     return json.loads(
         gs_filtered.to_json()
     )
+
+
+@router.get("/osmnx/highway/nodes/{z}/{x}/{y}.geojson")
+async def osmnx_highway_nodes(
+    z: int,
+    x: int,
+    y: int,
+    highway: Optional[str] = None,
+) -> dict:
+    """
+    ***
+    """
+    gdf = gdf_nodes_highway.copy()
+
+    # get bbox
+    nw = tile_coord(z, x, y)
+    se = tile_coord(z, x+1, y+1)
+    bbox = shapely.geometry.Polygon(
+        [
+            nw, (se[0], nw[1]),
+            se, (nw[0], se[1]), nw
+        ]
+    )
+
+    # filter by highway
+    if highway is not None:
+        # T.B.D
+        gdf = gdf
+
+    # filtering
+    intersections = gdf.geometry.intersection(bbox)
+    gs_filtered = intersections[~intersections.is_empty] # geoseries
+    gdf_filtered = gpd.GeoDataFrame(
+        gdf.loc[gs_filtered.index, :].drop(columns=['geometry']),
+        geometry=gs_filtered,
+    )
+
+    # NO DATA
+    if len(gs_filtered) == 0:
+        raise HTTPException(status_code=404, detail="No Data")
+
+    # return geojson
+    return json.loads(
+        gdf_filtered.to_json()
+    )
+
 
 
 def tile_coord(
