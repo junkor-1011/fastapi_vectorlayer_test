@@ -1,75 +1,75 @@
 <!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>FastAPI GeoJSONベクターサーバーテスト</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.3/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-tilelayer-geojson/1.0.2/TileLayer.GeoJSON.min.js "></script>
-<script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
-<style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>FastAPI GeoJSONベクターサーバーテスト</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.3/dist/leaflet.css"/>
+        <script src="https://unpkg.com/leaflet@0.7.3/dist/leaflet.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-tilelayer-geojson/1.0.2/TileLayer.GeoJSON.min.js "></script>
+        <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+        <style>
 
 body {padding: 0; margin: 0;}
 html, body, #mapdiv {height: 100%; width: 100%;}
 .leaflet-container {background: #fff;}
 .gsi-div-icon {
-	background: none;
-	white-space: nowrap;
-	border:none;
+    background: none;
+    white-space: nowrap;
+    border:none;
 }
-</style>
-</head>
-<body>
-<div id="mapdiv">
-<script>
+        </style>
+    </head>
+    <body>
+        <div id="mapdiv">
+            <script>
 
-// TMP Test
-const japan_ver821 = new L.TileLayer.GeoJSON(
-  'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson',
-  {crossOrigin: false,
-   attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
-  });
+                // TMP Test
+                const japan_ver821 = new L.TileLayer.GeoJSON(
+                    'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson',
+                    {crossOrigin: false,
+                        attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+                    });
 
-const yamagata = new L.TileLayer.GeoJSON(
-  'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson?KEN=山形県',
-  {crossOrigin: false,
-   attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
-  });
+                const yamagata = new L.TileLayer.GeoJSON(
+                    'https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson?KEN=山形県',
+                    {crossOrigin: false,
+                        attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+                    });
 
-const osm = L.tileLayer('http://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
-    attribution: "<a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
-    minZoom: 10,
-    maxNativeZoom: 18
-  });
+                const osm = L.tileLayer('http://tile.openstreetmap.jp/{z}/{x}/{y}.png', {
+                    attribution: "<a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a> contributors",
+                    minZoom: 10,
+                    maxNativeZoom: 18
+                });
 
 
-const std = L.tileLayer(
+                const std = L.tileLayer(
 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
-{attribution: "地理院タイル（標準地図）",
-maxNativeZoom: 18, maxZoom: 18, opacity:1});
+                    {attribution: "地理院タイル（標準地図）",
+                        maxNativeZoom: 18, maxZoom: 18, opacity:1});
 
-const ort = L.tileLayer(
+                const ort = L.tileLayer(
 'https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg',
-{attribution: "地理院タイル（オルソ）",
-maxNativeZoom: 17, maxZoom: 18, opacity:0.7});
+                    {attribution: "地理院タイル（オルソ）",
+                        maxNativeZoom: 17, maxZoom: 18, opacity:0.7});
 
-const blank = L.tileLayer(
+                const blank = L.tileLayer(
 'https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png',
-{attribution: "地理院タイル（白地図）",
-maxNativeZoom: 14, maxZoom: 18, opacity:1});
+                    {attribution: "地理院タイル（白地図）",
+                        maxNativeZoom: 14, maxZoom: 18, opacity:1});
 
-const map = L.map('mapdiv', {
-  center: [35.705698,139.957527], zoom: 16,minZoom: 2, maxZoom: 18,
-  });
+                const map = L.map('mapdiv', {
+                    center: [35.705698,139.957527], zoom: 16,minZoom: 2, maxZoom: 18,
+                });
 
-L.control.scale({imperial: false}).addTo(map);
+                L.control.scale({imperial: false}).addTo(map);
 
-const baseLayers ={"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank, 'osm': osm.addTo(map)};
-const overlays = {'japan_ver821':japan_ver821, 'yamagata': yamagata};
+                const baseLayers ={"地理院タイル（標準地図）": std,"地理院タイル（オルソ）": ort,"地理院タイル（白地図）": blank, 'osm': osm.addTo(map)};
+                const overlays = {'japan_ver821':japan_ver821, 'yamagata': yamagata};
 
-L.control.layers(baseLayers, overlays,{position:'topright',collapsed:false}).addTo(map);
-const hash = L.hash(map);
-</script>
-</body>
+                L.control.layers(baseLayers, overlays,{position:'topright',collapsed:false}).addTo(map);
+                const hash = L.hash(map);
+            </script>
+    </body>
 </html>
