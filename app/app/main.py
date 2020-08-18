@@ -5,6 +5,7 @@ app main
 # import pathlib
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse, HTMLResponse
 
 from .routers import (
     api_gpd,
@@ -29,7 +30,13 @@ def create_app():
 app = create_app()
 
 
-@app.get('/')
-async def site_root():
+@app.get('/', response_class=HTMLResponse)
+async def main_menu():
+    return RedirectResponse("/client/index.html")
+
+
+
+@app.get('/hello_world')
+async def hello_world():
     """root"""
     return {"message": "Hello, WORLD!"}
