@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+  <title>Leaflet1.2 GeoJSON Tile Tips</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-hash@0.2.1/leaflet-hash.js"></script>
+</head>
+
+<body>
+  <div id="map" style="position:absolute;top:0;left:0;bottom:0;right:0;"></div>
+  <script>
+    // Initalize map
+    var map = L.map("map", L.extend({
+      minZoom: 9,
+      zoom: 18,
+      maxZoom: 22,
+      center: [35.64430, 139.67124]
+    }, L.Hash.parseHash(location.hash)));
+    map.zoomControl.setPosition("bottomright");
+    L.hash(map);
+
+    // Add background layer
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+      attribution: "<a href='http://maps.gsi.go.jp/development/ichiran.html'>GSI</a>",
+      maxZoom: 22,
+      maxNativeZoom: 18
+    }).addTo(map);
+
+    // Create tilelayer with empty image
+    L.tileLayer(L.Util.emptyImageUrl, {
+      attribution: "<a href='https://www.esrij.com/products/japan-shp/'>全国市区町村界データ | ESRIジャパン</a>",
+      maxZoom: 22,
+      maxNativeZoom: 9,
+      minNativeZoom: 9,
+    }).on("tileload", function(event) {
+      // Add tileload event handler to load geojson and add geojson layer
+      var url = "https://localhost:8443/api_gpd/japan_ver821/test0/{z}/{x}/{y}.geojson";
+      fetch(L.Util.template(url, event.coords)).then(a => a.ok ? a.json() : null).then(geojson => {
+        if (!geojson || !this._map) return;
+        event.tile.geojson = L.geoJSON(geojson, {
+          style: function(geojson) {
+            return {
+              weight: 1.2,
+              fillColor: "blue",
+              fillOpacity: 0.3,
+              color: "red",
+              opacity: 0.5,
+            };
+          }
+        }).addTo(this._map);
+      });
+    }).on("tileunload", function(event) {
+      // Add tileunload event handler to remove geojson layer
+      if (event.tile.geojson && this._map)
+        this._map.removeLayer(event.tile.geojson);
+    }).addTo(map);
+  </script>
+</body>
+
+</html>
