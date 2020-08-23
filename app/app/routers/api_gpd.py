@@ -13,9 +13,12 @@ from typing import (
 from fastapi import (
     APIRouter,
     HTTPException,
+    Response,
 )
 import geopandas as gpd
 import shapely.geometry
+import mapbox_vector_tile
+import geobuf
 
 
 router = APIRouter()
@@ -199,6 +202,35 @@ async def osmnx_highway_edges(
     # return geojson
     return json.loads(
         gdf_filtered.to_json()
+    )
+
+
+@router.get(
+    "/geobuf/japan_ver821.pbf",
+    responses={
+        200: {"content": {"application/vnd.mapbox-vector-tile": {}}}
+    }
+)
+async def esri_japan_ver821_geobuf(
+):
+    """
+    ***
+
+    Refs:
+        - https://github.com/pygeobuf/pygeobuf
+    """
+
+    gdf = gdf_japan_ver821.copy()
+
+    # encode
+    tile_dict = json.loads(gdf.to_json())
+    tile_dict['name'] = "japan_ver821" # layer name
+    pbf = geobuf.encode(tile_dict)
+
+    # return tile
+    return Response(
+        content=pbf,
+        media_type="application/vnd.mapbox-vector-tile",
     )
 
 
