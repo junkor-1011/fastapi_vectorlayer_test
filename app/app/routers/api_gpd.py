@@ -206,6 +206,68 @@ async def osmnx_highway_edges(
 
 
 @router.get(
+    "/japan_ver821/mvt/{z}/{x}/{y}.mvt",
+    responses={
+        200: {"content": {"application/vnd.mapbox-vector-tile": {}}}
+    }
+)
+async def esri_japan_ver821_mvt(
+    z: int,
+    x: int,
+    y: int,
+    limit_zmin: Optional[int] = 8,
+):
+    """
+    mvt(pbf) binary vector TileLayer
+
+    CAUTION:
+        - NOT works well
+
+    ToDo:
+        - https://github.com/tilezen/mapbox-vector-tile#coordinate-transformations-for-encoding
+    """
+    if limit_zmin is not None:
+        if z < limit_zmin:
+            raise HTTPException(status_code=404, detail="Over limit of zoom")
+
+
+    gdf = gdf_japan_ver821.copy()
+
+    # get bbox
+    nw = tile_coord(z, x, y)
+    se = tile_coord(z, x+1, y+1)
+    bbox = shapely.geometry.Polygon(
+        [
+            nw, (se[0], nw[1]),
+            se, (nw[0], se[1]), nw
+        ]
+    )
+
+    # filtering
+    intersections = gdf.geometry.intersection(bbox)
+    gs_filtered = intersections[~intersections.is_empty] # geoseries
+    gdf_filtered = gpd.GeoDataFrame(
+        gdf.loc[gs_filtered.index, :].drop(columns=['geometry']),
+        geometry=gs_filtered,
+    )
+
+    # NO DATA
+    if len(gs_filtered) == 0:
+        raise HTTPException(status_code=404, detail="No Data")
+
+    # encode
+    tile_dict = json.loads(gdf_filtered.to_json())
+    tile_dict['name'] = "japan_ver821" # layer name
+    tile_mvt = mapbox_vector_tile.encode([tile_dict])
+
+    # return tile
+    return Response(
+        content=tile_mvt,
+        media_type="application/vnd.mapbox-vector-tile",
+    )
+
+
+@router.get(
     "/geobuf/japan_ver821.pbf",
     responses={
         200: {"content": {"application/vnd.mapbox-vector-tile": {}}}
